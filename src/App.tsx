@@ -1,25 +1,29 @@
+import { HeaderBar } from '@dhis2/ui-widgets';
 import React from 'react';
-import logo from './logo.svg';
+import { HashRouter as Router, Route, Switch } from "react-router-dom";
+import { AggregateWizard } from './components/AggregateWizard';
 import './App.css';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="w-screen h-screen container-grid bg-white">
+        <HeaderBar appName={'Data Import Wizard'}
+          style={{
+            left: 0,
+            position: 'fixed',
+            top: 0,
+            width: '100%',
+            zIndex: 1000,
+          }}
+        />
+        <Switch>
+          <Route exact path="/">
+            <AggregateWizard />
+          </Route>
+        </Switch>
+      </div>
+    </Router>
   );
 }
 

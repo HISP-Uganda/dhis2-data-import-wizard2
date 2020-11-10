@@ -1,38 +1,72 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.full-height {
+  width: 100vw;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  flex-direction: column;
+  height: 100vh;
 }
 
-.App-link {
-  color: #61dafb;
+.height-48 {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  height: 100%;
+  /* height: calc(100vh - 48px); */
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.Grid {
+  border: 1px solid #d9dddd;
+}
+
+.GridItemEven,
+.GridItemOdd {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.GridItemEven {
+  background-color: #f8f8f0;
+}
+
+.wrapper {
+  min-height: (100vh - 48px) px;
+}
+
+.container-grid {
+  display: grid;
+  grid-template-rows: 48px 1fr;
+}
+
+.wizard {
+  display: grid;
+  grid-template-rows: 100px 1fr 50px;
+}
+
+/* .ant-collapse-content-box {
+   padding: 0 !important;
+  margin: 0 !important;
+} */
+
+/* This is what we are focused on */
+
+.modal{
+  /* background-color: transparent !important; */
+  background-color: #d9dddd;
+}
+
+.table-wrapper th,
+.table-wrapper1 th {
+  position: sticky;
+  top: 0;
+}
+
+th {
+  --bg-opacity: 1;
+  background-color: #cbd5e0;
+  background-color: rgba(203, 213, 224, var(--bg-opacity));
+  z-index: 1000;
 }
