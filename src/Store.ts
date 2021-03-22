@@ -1,4 +1,5 @@
 import { action, computed, extendObservable, observable } from "mobx";
+import { dataSetOrgUnitsPayload } from "./Common";
 import AggregateMapping from "./models/AggregateMapping";
 import { Filter } from "./models/Filter";
 
@@ -49,8 +50,8 @@ export class Store {
 
   @action fetchSavedAggregates = async () => {
     try {
-      // const api = this.d2.Api.getApi();
-      // await api.post('metadata', { sqlViews: [dataSetOrgUnitsPayload] });
+      const api = this.d2.Api.getApi();
+      await api.post('metadata', { sqlViews: [dataSetOrgUnitsPayload] });
       const namespace = await this.checkDataStore("agg-wizard");
       if (namespace) {
         const { keys } = namespace;

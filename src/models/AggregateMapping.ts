@@ -49,6 +49,10 @@ class AggregateMapping implements IAggregateMapping {
     attributes: {
       current: 1,
       pageSize: 18
+    },
+    source: {
+      current: 1,
+      pageSize: 18
     }
   }
   @observable workingPeriod: [moment.Moment, moment.Moment] = [moment('2020-01-01'), moment('2020-03-31')];
@@ -170,7 +174,7 @@ class AggregateMapping implements IAggregateMapping {
   @action loadLocalDataset = async () => {
     this.loading = true;
     const api = this.d2.Api.getApi();
-    this.setMessage('Loading local data set');
+    this.setMessage(`Loading selected ${this.isDestinaton ? 'destination' : 'source'} data set`);
     const dataSet = await api.get(`dataSets/${this.localDataSet}.json`, { fields: 'id,name,code,periodType,categoryCombo[id,name,categoryOptionCombos[id,name]],dataSetElements[dataElement[id,name,code,valueType,categoryCombo[id,name,isDefault,categoryOptionCombos[id,name]]]]' });
 
     this.periodType = dataSet.periodType;
@@ -265,6 +269,7 @@ class AggregateMapping implements IAggregateMapping {
     } else {
       this.remoteOrganisations = this.changeMapping(this.remoteOrganisations, o, this.localOrganisations);
     }
+    this.setMessage("");
   }
 
   @action autoMapCategoryOptionCombos = () => {
@@ -275,6 +280,7 @@ class AggregateMapping implements IAggregateMapping {
     } else {
       this.remoteCategoryOptionCombos = this.changeMapping(this.remoteCategoryOptionCombos, c, this.localCategoryOptionCombos);
     }
+    this.setMessage("");
   }
 
   @action autoMapAttributes = () => {
@@ -285,10 +291,11 @@ class AggregateMapping implements IAggregateMapping {
     } else {
       this.remoteAttribution = this.changeMapping(this.remoteAttribution, a, this.localAttribution);
     }
+    this.setMessage("");
   }
 
   @action loadRemoteDataSet = async () => {
-    this.setMessage("Remote data set found, loading it");
+    this.setMessage(`Loading selected ${this.isDestinaton ? 'source' : 'destination'} data set`);
     let categoryOptionCombos: any = [];
     let endpoint = 'sqlViews/pErnQQ38kJY/data.json';
     if (this.type === '5') {
@@ -487,10 +494,12 @@ class AggregateMapping implements IAggregateMapping {
     if (this.isDestinaton) {
       const dxs = Object.keys(this.dataElementMapping);
       const dhis2Url = getDHIS2Url(this.url);
-      const chunked = chunk(dxs, 100);
-      for (const c of chunked) {
+      const chunked = chunk(dxs, 25);
+      for (let i = 0; i < chunked.length; i++) {
+        const c = chunked[i];
+        this.setMessage(`Fetching data for chunk ${i + 1}`);
         try {
-          const url = `${dhis2Url}/analytics.json?dimension=dx:${c.join(';')}&dimension=pe:${period}&dimension=ou:LEVEL-${this.remoteDataSet}&ignoreLimit=true&skipMeta=true`;
+          const url = `${dhis2Url}/analytics.json?dimension=dx:${c.join(';')}&dimension=pe:${period}&dimension=ou:LEVEL-${this.remoteDataSet}&skipMeta=true`;
           const { headers, rows } = await callAxios(url, {}, this.username, this.password);
           const dxIndex = headers.findIndex((h: any) => h.name === 'dx');
           const peIndex = headers.findIndex((h: any) => h.name === 'pe');
@@ -512,7 +521,9 @@ class AggregateMapping implements IAggregateMapping {
               value
             }
           });
-          await this.insertDataSet(processed)
+          this.setMessage(`Inserting data for chunk ${i + 1}`)
+          await this.insertDataSet(processed);
+          this.setMessage("")
         } catch (error) {
           console.log(error);
         }
@@ -618,7 +629,6 @@ class AggregateMapping implements IAggregateMapping {
     this.loading = true;
     const startDate = this.workingPeriod[0].format('YYYY-MM-DD');
     const endDate = this.workingPeriod[1].format('YYYY-MM-DD');
-    console.log(startDate, endDate);
     const dhis2Url = getDHIS2Url(this.url);
     const mess = this.action === 'upload' ? 'Inserting' : 'Downloading';
     const units = this.organisations.filter((ou: WizardObject) => ou.selected)
@@ -905,6 +915,22 @@ class AggregateMapping implements IAggregateMapping {
         return 'year'
       default:
         return 'date'
+    }
+  }
+
+  @computed get currentSource() {
+    const paging = this.paging.source;
+
+    const page = paging.current - 1;
+
+    const final = this.organisations.slice(
+      page * paging.pageSize,
+      page * paging.pageSize + paging.pageSize
+    );
+
+    return {
+      total: this.organisations.length,
+      units: final
     }
   }
 
